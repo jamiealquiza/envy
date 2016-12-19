@@ -11,17 +11,21 @@ import (
 // as the environment variable prefix
 // for each flag configured.
 func Parse(p string) {
-	flag.VisitAll(func(f *flag.Flag) {
+	flag.CommandLine.VisitAll(func(f *flag.Flag) {
 		// Create an env var name
 		// based on the supplied prefix.
 		envVar := fmt.Sprintf("%s_%s", p, strings.ToUpper(f.Name))
-		// Replace hyphens with underscores.
 		envVar = strings.Replace(envVar, "-", "_", -1)
 
-		// Traverse the available flags
-		// and look for env overrides.
+		// Update the Flag.Value if the
+		// env var is non "".
 		if val := os.Getenv(envVar); val != "" {
+			// Update the value.
 			flag.Set(f.Name, val)
 		}
+
+		// Append the env var to the
+		// Flag.Usage field.
+		f.Usage = fmt.Sprintf("%s [%s]", f.Usage, envVar)
 	})
 }
