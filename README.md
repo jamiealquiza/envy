@@ -54,7 +54,7 @@ Usage of ./example:
  If this isn't desired, simply call `envy.Parse()` after `flag.Parse()`:
 ```go
 // ...
-		flag.Parse()
+	flag.Parse()
         envy.Parse("MYAPP") // looks for MYAPP_ADDRESS & MYAPP_PORT
 // ...
 ```
