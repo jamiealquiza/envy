@@ -1,11 +1,12 @@
 # envy
 
-Simplifies the ability to override Go flags with environment variables. It reduces the need to write conditional checks for each flag and enforces a naming convention.
+Automatically exposes environment variables for all of your flags.
 
 Envy takes one parameter: a namespace prefix that will be used for environment variable lookups. Each flag registered in your app will be prefixed, uppercased, and hyphens exchanged for underscores; if a matching environment variable is found, it will override (or set) the respective flag value.
 
-### Feature: Automatic Env Var Overrides
+### Example
 
+Code:
 ```go
 package main
 
@@ -28,6 +29,7 @@ func main() {
 }
 ```
 
+Output:
 ```
 % ./example
 127.0.0.1
@@ -38,7 +40,9 @@ func main() {
 9080
 ```
 
-### Feature: Automatically Adds Env Vars to Help Output
+### Usage
+
+**Env vars in help output:**
 
 Envy can update your app help output so that it includes the environment variable that would be referenced for overriding each flag. This is done by calling `envy.Parse()` before `flag.Parse()`.
 
@@ -67,7 +71,7 @@ Usage of ./example:
         Some random port (default "8131")
 ```
 
-### Usage: Satisfying Types
+**Satisfying types:**
 
 Environment variables should be defined using a type that satisfies the respective type in your Go application's flag. For example:
 - `string` -> `APP_ASTRINGVAR="someString"`
