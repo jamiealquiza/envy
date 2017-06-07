@@ -2,7 +2,7 @@
 
 Automatically exposes environment variables for all of your flags.
 
-Envy takes one parameter: a namespace prefix that will be used for environment variable lookups. Each flag registered in your app will be prefixed, uppercased, and hyphens exchanged for underscores; if a matching environment variable is found, it will override (or set) the respective flag value.
+Envy takes one parameter: a namespace prefix that will be used for environment variable lookups. Each flag registered in your app will be prefixed, uppercased, and hyphens exchanged for underscores; if a matching environment variable is found, it will set the respective flag value as long as the value is not otherwise explicitly set (see usage for precedence).
 
 ### Example
 
@@ -42,9 +42,20 @@ Output:
 
 ### Usage
 
+**Variable precedence:**
+
+Envy results in the following order of precedence, each item overwriting the previous:
+`flag default` -> `Envy generated env var` -> `flag set at the CLI`.
+
+Results referencing the example code:
+- `./example` will result in `port` being set to `8131`
+- `MYAPP_PORT=5678 ./example` will result in `port` being set to `5678`
+- `MYAPP_PORT=5678 ./example -port=1234` will result in `port` being set to `1234`
+
+
 **Env vars in help output:**
 
-Envy can update your app help output so that it includes the environment variable that would be referenced for overriding each flag. This is done by calling `envy.Parse()` before `flag.Parse()`.
+Envy can update your app help output so that it includes the environment variable generated/referenced for each flag. This is done by calling `envy.Parse()` before `flag.Parse()`.
 
 The above example:
 ```
