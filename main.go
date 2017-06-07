@@ -11,6 +11,12 @@ import (
 // as the environment variable prefix
 // for each flag configured.
 func Parse(p string) {
+	// Build a map of explicitly set flags.
+	set := map[string]bool{}
+	flag.CommandLine.Visit(func(f *flag.Flag) {
+		set[f.Name] = true
+	})
+
 	flag.CommandLine.VisitAll(func(f *flag.Flag) {
 		// Create an env var name
 		// based on the supplied prefix.
@@ -20,8 +26,11 @@ func Parse(p string) {
 		// Update the Flag.Value if the
 		// env var is non "".
 		if val := os.Getenv(envVar); val != "" {
-			// Update the value.
-			flag.Set(f.Name, val)
+			// Update the value if it hasn't
+			// already been set.
+			if defined := set[f.Name]; !defined {
+				flag.CommandLine.Set(f.Name, val)
+			}
 		}
 
 		// Append the env var to the
