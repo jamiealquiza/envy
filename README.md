@@ -30,11 +30,13 @@ func main() {
 ```
 
 Output:
-```
+```sh
+# Prints flag defaults
 % ./example
 127.0.0.1
 8131
 
+# Flag defaults overridden
 % MYAPP_ADDRESS="0.0.0.0" MYAPP_PORT="9080" ./example
 0.0.0.0
 9080
