@@ -88,3 +88,7 @@ Environment variables should be defined using a type that satisfies the respecti
 - `string` -> `APP_ASTRINGVAR="someString"`
 - `int` -> `APP_ANINTVAR=42`
 - `bool` -> `APP_ABOOLVAR=true`
+
+**Side effects:**
+
+Setting a flag through an Envy generated environment variable will have the same effects on the default `flag.CommandLine` as if the flag were set via the command line. This only affect users that may rely on `flag.CommandLine` methods that make distinctions between set and to-be set flags (such as the `Visit` method).
