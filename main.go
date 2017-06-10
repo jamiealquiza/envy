@@ -1,3 +1,5 @@
+// Package envy automatically exposes environment
+// variables for all of your flags.
 package envy
 
 import (
