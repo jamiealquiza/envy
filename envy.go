@@ -9,17 +9,25 @@ import (
 	"strings"
 )
 
-// Parse takes a string p that is used
-// as the environment variable prefix
-// for each flag configured.
+// Parse takes a prefix string and exposes environment variables
+// for all flags in the default FlagSet (flag.CommandLine) in the
+// form of PREFIX_FLAGNAME.
 func Parse(p string) {
+	update(p, flag.CommandLine)
+}
+
+// update takes a prefix string p and *flag.FlagSet. Each flag
+// in the FlagSet is exposed as an upper case environment variable
+// prefixed with p. Any flag that was not explicitly set by a user
+// is updated to the environment variable, if set.
+func update(p string, fs *flag.FlagSet) {
 	// Build a map of explicitly set flags.
-	set := map[string]bool{}
-	flag.CommandLine.Visit(func(f *flag.Flag) {
-		set[f.Name] = true
+	set := map[string]interface{}{}
+	fs.Visit(func(f *flag.Flag) {
+		set[f.Name] = nil
 	})
 
-	flag.CommandLine.VisitAll(func(f *flag.Flag) {
+	fs.VisitAll(func(f *flag.Flag) {
 		// Create an env var name
 		// based on the supplied prefix.
 		envVar := fmt.Sprintf("%s_%s", p, strings.ToUpper(f.Name))
@@ -30,8 +38,8 @@ func Parse(p string) {
 		if val := os.Getenv(envVar); val != "" {
 			// Update the value if it hasn't
 			// already been set.
-			if defined := set[f.Name]; !defined {
-				flag.CommandLine.Set(f.Name, val)
+			if _, defined := set[f.Name]; !defined {
+				fs.Set(f.Name, val)
 			}
 		}
 
