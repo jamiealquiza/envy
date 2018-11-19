@@ -1,33 +1,47 @@
-// Package envy automatically exposes environment
-// variables for all of your flags.
 package envy
 
 import (
-	"flag"
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
-// Parse takes a prefix string and exposes environment variables
-// for all flags in the default FlagSet (flag.CommandLine) in the
-// form of PREFIX_FLAGNAME.
-func Parse(p string) {
-	update(p, flag.CommandLine)
+func ParseCobra(c *cobra.Command, p string, r bool) {
+	// Append subcommand names to the prefix.
+	if c.Root() != c {
+		p = fmt.Sprintf("%s_%s", p, strings.ToUpper(c.Name()))
+	}
+
+	// Update the current command.
+	updateCobra(p, c.Flags())
+
+	// Recursively update child commands.
+	if r {
+		for _, child := range c.Commands() {
+			if child.Name() == "help" {
+				continue
+			}
+
+			ParseCobra(child, p, r)
+		}
+	}
 }
 
-// update takes a prefix string p and *flag.FlagSet. Each flag
-// in the FlagSet is exposed as an upper case environment variable
-// prefixed with p. Any flag that was not explicitly set by a user
-// is updated to the environment variable, if set.
-func update(p string, fs *flag.FlagSet) {
+func updateCobra(p string, fs *pflag.FlagSet) {
 	// Build a map of explicitly set flags.
 	set := map[string]interface{}{}
-	fs.Visit(func(f *flag.Flag) {
+	fs.Visit(func(f *pflag.Flag) {
 		set[f.Name] = nil
 	})
 
-	fs.VisitAll(func(f *flag.Flag) {
+	fs.VisitAll(func(f *pflag.Flag) {
+		if f.Name == "help" {
+			return
+		}
+
 		// Create an env var name
 		// based on the supplied prefix.
 		envVar := fmt.Sprintf("%s_%s", p, strings.ToUpper(f.Name))
