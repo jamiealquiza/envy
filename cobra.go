@@ -9,23 +9,46 @@ import (
 	"github.com/spf13/pflag"
 )
 
-func ParseCobra(c *cobra.Command, p string, r bool) {
-	// Append subcommand names to the prefix.
-	if c.Root() != c {
-		p = fmt.Sprintf("%s_%s", p, strings.ToUpper(c.Name()))
+// CobraConfig holds configurations for calls
+// to ParseCobra.
+type CobraConfig struct {
+	// The environment variable prefix.
+	Prefix string
+	// Expose flags for child commands.
+	Recursive bool
+	// Whether to expose flags for persistent FlagSets.
+	Persistent bool
+}
+
+// ParseCobra takes a *cobra.Command and exposes environment variables
+// for all local flags in the command FlagSet in the form of PREFIX_FLAGNAME
+// where PREFIX is set to that of CobraConfig.Prefix. Environment variables are
+// exposed for persistent flags if the CobraConfig.Persistent is set to true.
+// If CobraConfig.Recursive is set to true, all child command FlagSets will
+// have environment variables exposed in the form of PREFIX_SUBCOMMMAND_FLAGNAME.
+func ParseCobra(c *cobra.Command, cfg CobraConfig) {
+	// Check if this is the root command.
+	switch c.Root() == c {
+	case false:
+		// If not, append subcommand names to the prefix.
+		cfg.Prefix = fmt.Sprintf("%s_%s", cfg.Prefix, strings.ToUpper(c.Name()))
+	case true && cfg.Persistent:
+		// If this is the root command, update the
+		// persistent FlagSet, if configured.
+		updateCobra(cfg.Prefix, c.PersistentFlags())
 	}
 
-	// Update the current command.
-	updateCobra(p, c.Flags())
+	// Update the current command local FlagSet.
+	updateCobra(cfg.Prefix, c.Flags())
 
 	// Recursively update child commands.
-	if r {
+	if cfg.Recursive {
 		for _, child := range c.Commands() {
 			if child.Name() == "help" {
 				continue
 			}
 
-			ParseCobra(child, p, r)
+			ParseCobra(child, cfg)
 		}
 	}
 }
