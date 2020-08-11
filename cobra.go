@@ -27,14 +27,14 @@ type CobraConfig struct {
 // If CobraConfig.Recursive is set to true, all child command FlagSets will
 // have environment variables exposed in the form of PREFIX_SUBCOMMMAND_FLAGNAME.
 func ParseCobra(c *cobra.Command, cfg CobraConfig) {
-	// Check if this is the root command.
-	switch c.Root() == c {
-	case false:
+	// Check if this is the root command
+	if c.Root() != c {
 		// If not, append subcommand names to the prefix.
 		cfg.Prefix = fmt.Sprintf("%s_%s", cfg.Prefix, strings.ToUpper(c.Name()))
-	case true && cfg.Persistent:
-		// If this is the root command, update the
-		// persistent FlagSet, if configured.
+	}
+
+	// Update the persistent FlagSet, if configured.
+	if cfg.Persistent {
 		updateCobra(cfg.Prefix, c.PersistentFlags())
 	}
 
