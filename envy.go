@@ -32,6 +32,7 @@ func update(p string, fs *flag.FlagSet) {
 		// based on the supplied prefix.
 		envVar := fmt.Sprintf("%s_%s", p, strings.ToUpper(f.Name))
 		envVar = strings.Replace(envVar, "-", "_", -1)
+		envVar = strings.Replace(envVar, ".", "_", -1)
 
 		// Update the Flag.Value if the
 		// env var is non "".
